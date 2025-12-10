@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GeoToby – Modern Dark Edition</title>
+<style>
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+        background: linear-gradient(135deg, #0d0d0f, #1c1c24);
+        color: #e8e8e8;
+        display: flex;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 700px;
+        background: rgba(255,255,255,0.05);
+        padding: 25px;
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 0 25px rgba(0,0,0,0.35);
+    }
+
+    h1 {
+        font-size: 2.4em;
+        margin-bottom: 10px;
+        text-shadow: 0 0 10px #6bd9ff;
+    }
+
+    #image-container img {
+        width: 100%;
+        max-width: 380px;
+        border-radius: 12px;
+        margin: 20px 0;
+        box-shadow: 0 0 15px rgba(107,217,255,0.4);
+    }
+
+    #generate-btn {
+        width: 100%;
+        padding: 16px;
+        font-size: 1.2em;
+        margin-bottom: 20px;
+        border-radius: 12px;
+        border: none;
+        background: linear-gradient(135deg, #2a9df4, #6bd9ff);
+        color: #0a0a0a;
+        cursor: pointer;
+        font-weight: bold;
+        transition: 0.25s;
+    }
+    #generate-btn:hover {
+        transform: scale(1.03);
+        box-shadow: 0 0 14px #6bd9ff;
+    }
+
+    #country {
+        font-size: 1.9em;
+        margin: 15px 0;
+        font-weight: bold;
+        text-shadow: 0 0 8px #ffffff60;
+    }
+
+    .grid {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        margin-top: 20px;
+    }
+
+    .category-btn {
+        padding: 14px 12px;
+        font-size: 1em;
+        border-radius: 12px;
+        border: none;
+        cursor: pointer;
+        background: rgba(255,255,255,0.08);
+        color: #e8e8e8;
+        transition: 0.25s;
+        backdrop-filter: blur(6px);
+    }
+    .category-btn:hover:not(:disabled) {
+        background: rgba(255,255,255,0.18);
+        transform: translateY(-3px);
+    }
+    .category-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+
+    #score {
+        margin-top: 25px;
+        font-size: 1.8em;
+        text-shadow: 0 0 6px #6bd9ff;
+    }
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>GeoToby</h1>
+
+<div id="image-container">
+    <img src="geotoby.jpg" alt="GeoToby Image">
+</div>
+
+
+<button id="genBtn">Country Generator Button</button>
+
+<div id="currentCountry" style="font-size:1.9em;font-weight:700;margin-top:12px;">No country yet</div>
+
+<div class="grid" id="cats"></div>
+
+<div class="log" id="log" style="margin-top:12px;background:rgba(255,255,255,0.03);padding:10px;border-radius:8px;height:120px;overflow:auto;"></div>
+
+<div id="score" style="margin-top:18px;">Total score: <span id="totalScore">0</span> — Rounds: <span id="roundsDone">0</span>/8</div>
+
+Total Score: 0</div>
+
+<script>
+
+const data = {"Fish Consumption per Capita": {"Iceland": 1, "Maldives": 2, "Kiribati": 3, "Hong Kong": 4, "South Korea": 5, "Tuvalu": 6, "Antigua and Barbuda": 7, "Portugal": 8, "Malaysia": 9, "Norway": 10, "Micronesia": 11, "Marshall Islands": 12, "Japan": 13, "Samoa": 14, "Seychelles": 15, "Barbados": 16, "China": 17, "Indonesia": 18, "Myanmar": 19, "Vietnam": 20, "Cambodia": 21, "Spain": 22, "Saint Kitts and Nevis": 23, "Saint Lucia": 24, "France": 25, "Grenada": 26, "Finland": 27, "Solomon Islands": 28, "Luxembourg": 29, "Sweden": 30, "Vanuatu": 31, "Malta": 32, "Oman": 33, "Mauritius": 34, "Italy": 35, "Fiji": 36, "Lithuania": 37, "Thailand": 38, "Tonga": 39, "Bahamas": 40, "Gabon": 41, "Jamaica": 42, "Peru": 43, "Philippines": 44, "Nauru": 45, "Sao Tome and Principe": 46, "Bangladesh": 47, "Dominica": 48, "Israel": 49, "Laos": 50, "Sierra Leone": 51, "Guyana": 52, "New Zealand": 53, "Latvia": 54, "Australia": 55, "Ghana": 56, "Belgium": 57, "United Arab Emirates": 58, "Republic of Congo": 59, "Sri Lanka": 60, "Russia": 61, "Denmark": 62, "Qatar": 63, "USA": 64, "Croatia": 65, "Egypt": 66, "Gambia": 67, "Bahrain": 68, "Canada": 69, "Saint Vincent and the Grenadines": 70, "Ireland": 71, "Côte d'Ivoire": 72, "Greece": 73, "Netherlands": 74, "Libya": 75, "Trinidad and Tobago": 76, "Cyprus": 77, "Cameroon": 78, "Costa Rica": 79, "UK": 80, "Belize": 81, "Comoros": 82, "Morocco": 83, "Suriname": 84, "Switzerland": 85, "Tunisia": 86, "Uganda": 87, "Ukraine": 88, "Panama": 89, "Benin": 90, "Moldova": 91, "Chile": 92, "Austria": 93, "Senegal": 94, "Kuwait": 95, "Mexico": 96, "Saudi Arabia": 97, "Zambia": 98, "Mozambique": 99, "Germany": 100, "Slovenia": 100, "Estonia": 100, "Angola": 100, "Belarus": 100, "Montenegro": 100, "Uruguay": 100, "Iran": 100, "Poland": 100, "Guinea": 100, "Burkina Faso": 100, "Cape Verde": 100, "Czechia": 100, "Georgia": 100, "Venezuela": 100, "Slovakia": 100, "Namibia": 100, "Malawi": 100, "India": 100, "Colombia": 100, "Mali": 100, "Albania": 100, "Togo": 100, "Serbia": 100, "Brazil": 100, "Dominican Republic": 100, "Romania": 100, "North Macedonia": 100, "Mauritania": 100, "Bulgaria": 100, "El Salvador": 100, "Papua New Guinea": 100, "Argentina": 100, "Nigeria": 100, "East Timor": 100, "Tanzania": 100, "Nicaragua": 100, "Ecuador": 100, "Hungary": 100, "Bhutan": 100, "Cuba": 100, "South Africa": 100, "Bosnia and Herzegovina": 100, "Chad": 100, "Paraguay": 100, "Turkey": 100, "Rwanda": 100, "Armenia": 100, "Haiti": 100, "Liberia": 100, "Jordan": 100, "Lebanon": 100, "Honduras": 100, "Uzbekistan": 100, "Swaziland": 100, "Djibouti": 100, "Madagascar": 100, "Kazakhstan": 100, "Nepal": 100, "Democratic Republic of Congo": 100, "Guatemala": 100, "South Sudan": 100, "Kenya": 100, "Algeria": 100, "Zimbabwe": 100, "Turkmenistan": 100, "Guinea-Bissau": 100, "Burundi": 100, "Iraq": 100, "Botswana": 100, "Yemen": 100, "Bolivia": 100, "Azerbaijan": 100, "Lesotho": 100, "Niger": 100, "Syria": 100, "Somalia": 100, "Kyrgyzstan": 100, "Pakistan": 100, "Mongolia": 100, "Tajikistan": 100, "Sudan": 100, "Ethiopia": 100, "Afghanistan": 100, "Andorra": 100, "Brunei": 100, "Central African Republic": 100, "Cook Islands": 100, "Eritrea": 100, "Equatorial Guinea": 100, "Liechtenstein": 100, "Monaco": 100, "Kosovo": 100, "Palau": 100, "North Korea": 100, "Palestine": 100, "Singapore": 100, "San Marino": 100}, "Olympics 2012": {"USA": 1, "China": 2, "Russia": 3, "UK": 4, "Germany": 5, "Japan": 6, "Australia": 7, "France": 8, "South Korea": 9, "Italy": 10, "Netherlands": 11, "Ukraine": 12, "Canada": 13, "Hungary": 14, "Spain": 15, "Brazil": 16, "Cuba": 17, "Kazakhstan": 18, "New Zealand": 19, "Iran": 20, "Jamaica": 21, "Belarus": 22, "Kenya": 23, "Czechia": 24, "Azerbaijan": 25, "Poland": 25, "Romania": 27, "Denmark": 28, "Sweden": 29, "Colombia": 30, "Ethiopia": 31, "Georgia": 32, "Mexico": 32, "North Korea": 34, "South Africa": 35, "Croatia": 36, "India": 37, "Turkey": 38, "Lithuania": 39, "Ireland": 40, "Mongolia": 41, "Switzerland": 42, "Norway": 43, "Argentina": 44, "Serbia": 44, "Slovenia": 44, "Trinidad and Tobago": 47, "Uzbekistan": 47, "Slovakia": 49, "Tunisia": 50, "Thailand": 51, "Armenia": 52, "Belgium": 52, "Finland": 52, "Dominican Republic": 55, "Latvia": 56, "Egypt": 57, "Bulgaria": 58, "Estonia": 58, "Indonesia": 58, "Malaysia": 58, "Greece": 62, "Moldova": 62, "Qatar": 62, "Singapore": 62, "Bahamas": 66, "Algeria": 66, "Grenada": 66, "Uganda": 66, "Venezuela": 66, "Botswana": 71, "Cyprus": 71, "Gabon": 71, "Guatemala": 71, "Montenegro": 71, "Portugal": 71, "Afghanistan": 77, "Bahrain": 77, "Hong Kong": 77, "Kuwait": 77, "Morocco": 77, "Saudi Arabia": 77, "Tajikistan": 77, "Angola": 84, "Albania": 84, "Andorra": 84, "United Arab Emirates": 84, "Antigua and Barbuda": 84, "Austria": 84, "Burundi": 84, "Benin": 84, "Burkina Faso": 84, "Bangladesh": 84, "Bosnia and Herzegovina": 84, "Belize": 84, "Bolivia": 84, "Barbados": 84, "Brunei": 84, "Bhutan": 84, "Central African Republic": 84, "Chile": 84, "Côte d'Ivoire": 84, "Cameroon": 84, "Democratic Republic of Congo": 84, "Republic of Congo": 84, "Comoros": 84, "Cape Verde": 84, "Costa Rica": 84, "Djibouti": 84, "Dominica": 84, "Ecuador": 84, "Eritrea": 84, "Fiji": 84, "Micronesia": 84, "Ghana": 84, "Guinea": 84, "Gambia": 84, "Guinea-Bissau": 84, "Equatorial Guinea": 84, "Guyana": 84, "Honduras": 84, "Haiti": 84, "Iraq": 84, "Iceland": 84, "Israel": 84, "Jordan": 84, "Kyrgyzstan": 84, "Cambodia": 84, "Kiribati": 84, "Saint Kitts and Nevis": 84, "Laos": 84, "Lebanon": 84, "Liberia": 84, "Libya": 84, "Saint Lucia": 84, "Liechtenstein": 84, "Sri Lanka": 84, "Lesotho": 84, "Luxembourg": 84, "Monaco": 84, "Madagascar": 84, "Maldives": 84, "Marshall Islands": 84, "North Macedonia": 84, "Mali": 84, "Malta": 84, "Myanmar": 84, "Mozambique": 84, "Mauritania": 84, "Mauritius": 84, "Malawi": 84, "Namibia": 84, "Niger": 84, "Nigeria": 84, "Nicaragua": 84, "Nepal": 84, "Nauru": 84, "Oman": 84, "Pakistan": 84, "Panama": 84, "Peru": 84, "Philippines": 84, "Palau": 84, "Papua New Guinea": 84, "Paraguay": 84, "Palestine": 84, "Rwanda": 84, "Sudan": 84, "Senegal": 84, "Solomon Islands": 84, "Sierra Leone": 84, "El Salvador": 84, "San Marino": 84, "Somalia": 84, "Sao Tome and Principe": 84, "Suriname": 84, "Swaziland": 84, "Seychelles": 84, "Syria": 84, "Chad": 84, "Togo": 84, "Turkmenistan": 84, "East Timor": 84, "Tonga": 84, "Tuvalu": 84, "Tanzania": 84, "Uruguay": 84, "Saint Vincent and the Grenadines": 84, "Vietnam": 84, "Vanuatu": 84, "Samoa": 84, "Yemen": 84, "Zambia": 84, "Zimbabwe": 84, "Cook Islands": 100, "Kosovo": 100, "South Sudan": 100}, "CO2 Emissions per Capita": {"Qatar": 1, "Kuwait": 2, "Brunei": 3, "Bahrain": 4, "Trinidad and Tobago": 5, "Saudi Arabia": 6, "United Arab Emirates": 7, "Oman": 8, "Australia": 9, "USA": 10, "Kazakhstan": 11, "Canada": 12, "Mongolia": 13, "Palau": 14, "Russia": 15, "South Korea": 16, "Turkmenistan": 17, "Luxembourg": 18, "Iceland": 19, "Singapore": 20, "Libya": 21, "China": 22, "Iran": 23, "Malaysia": 24, "Japan": 25, "Bahamas": 26, "Belgium": 27, "Antigua and Barbuda": 28, "Poland": 29, "Czechia": 30, "South Africa": 31, "Germany": 32, "Norway": 33, "Ireland": 34, "Netherlands": 35, "Serbia": 36, "New Zealand": 37, "Austria": 38, "Belarus": 39, "Bosnia and Herzegovina": 40, "Estonia": 41, "Slovenia": 42, "Turkey": 43, "Cook Islands": 44, "Israel": 45, "Saint Kitts and Nevis": 46, "Guyana": 47, "Cyprus": 48, "Greece": 49, "Finland": 50, "Slovakia": 51, "Andorra": 52, "Nauru": 53, "Italy": 54, "Iraq": 55, "Seychelles": 56, "Barbados": 57, "Kosovo": 58, "Croatia": 59, "Denmark": 60, "Suriname": 61, "Bulgaria": 62, "Spain": 63, "UK": 64, "Hong Kong": 65, "Lithuania": 66, "Maldives": 67, "Algeria": 68, "Hungary": 69, "Marshall Islands": 70, "Venezuela": 71, "Chile": 72, "France": 73, "Azerbaijan": 74, "Uzbekistan": 75, "Ukraine": 76, "Argentina": 77, "Thailand": 78, "Montenegro": 79, "Equatorial Guinea": 80, "Mauritius": 81, "Vietnam": 82, "North Macedonia": 83, "Romania": 84, "Switzerland": 85, "Sweden": 86, "Mexico": 87, "Latvia": 88, "Portugal": 89, "Liechtenstein": 90, "Grenada": 91, "Malta": 92, "Laos": 93, "Georgia": 94, "Saint Lucia": 95, "Botswana": 96, "Jamaica": 97, "Dominican Republic": 98, "Indonesia": 99, "Panama": 100, "Lebanon": 100, "Tunisia": 100, "Dominica": 100, "Saint Vincent and the Grenadines": 100, "Ecuador": 100, "Armenia": 100, "North Korea": 100, "Uruguay": 100, "Bolivia": 100, "Brazil": 100, "Cuba": 100, "Egypt": 100, "India": 100, "Gabon": 100, "Bhutan": 100, "Peru": 100, "Jordan": 100, "Belize": 100, "Morocco": 100, "Moldova": 100, "Colombia": 100, "Costa Rica": 100, "Kyrgyzstan": 100, "Albania": 100, "Fiji": 100, "Philippines": 100, "Tonga": 100, "El Salvador": 100, "Republic of Congo": 100, "Micronesia": 100, "Syria": 100, "Cambodia": 100, "Honduras": 100, "Tuvalu": 100, "Paraguay": 100, "Namibia": 100, "Cape Verde": 100, "Samoa": 100, "Lesotho": 100, "Guatemala": 100, "Tajikistan": 100, "Mauritania": 100, "Sri Lanka": 100, "Palestine": 100, "Swaziland": 100, "Zimbabwe": 100, "Nicaragua": 100, "Papua New Guinea": 100, "Senegal": 100, "Pakistan": 100, "Comoros": 100, "Nepal": 100, "Bangladesh": 100, "Ghana": 100, "Sao Tome and Principe": 100, "Vanuatu": 100, "Angola": 100, "Nigeria": 100, "Myanmar": 100, "Zambia": 100, "Kiribati": 100, "Djibouti": 100, "East Timor": 100, "Côte d'Ivoire": 100, "Benin": 100, "Kenya": 100, "Solomon Islands": 100, "Sudan": 100, "Cameroon": 100, "Tanzania": 100, "Gambia": 100, "Togo": 100, "Mali": 100, "Burkina Faso": 100, "Guinea": 100, "Afghanistan": 100, "Haiti": 100, "Yemen": 100, "Mozambique": 100, "Eritrea": 100, "Sierra Leone": 100, "Guinea-Bissau": 100, "Liberia": 100, "Rwanda": 100, "South Sudan": 100, "Madagascar": 100, "Chad": 100, "Ethiopia": 100, "Uganda": 100, "Niger": 100, "Malawi": 100, "Central African Republic": 100, "Somalia": 100, "Burundi": 100, "Democratic Republic of Congo": 100, "Monaco": 100, "San Marino": 100}, "% Female": {"Hong Kong": 1, "Moldova": 2, "Latvia": 3, "Russia": 4, "Armenia": 5, "Ukraine": 6, "Belarus": 7, "Georgia": 8, "Lithuania": 9, "Tonga": 10, "Serbia": 11, "El Salvador": 12, "Estonia": 13, "Bosnia and Herzegovina": 14, "Antigua and Barbuda": 15, "Portugal": 16, "Zimbabwe": 17, "Bahamas": 18, "Saint Kitts and Nevis": 19, "Nepal": 20, "Barbados": 21, "Central African Republic": 22, "Hungary": 23, "Montenegro": 24, "Croatia": 25, "Sri Lanka": 26, "Bulgaria": 27, "Romania": 28, "Greece": 29, "Poland": 30, "France": 31, "Mexico": 32, "Uruguay": 33, "Mozambique": 34, "Kiribati": 35, "Lebanon": 36, "North Macedonia": 37, "South Africa": 38, "Guyana": 39, "Thailand": 40, "Kazakhstan": 41, "Lesotho": 42, "Rwanda": 43, "Japan": 44, "Malawi": 45, "Slovakia": 46, "Namibia": 47, "Italy": 48, "Monaco": 49, "Vietnam": 50, "Cambodia": 51, "Azerbaijan": 52, "Mauritania": 53, "Turkmenistan": 54, "Spain": 55, "Swaziland": 56, "Tajikistan": 57, "San Marino": 58, "Bangladesh": 59, "South Sudan": 60, "Kosovo": 61, "Nicaragua": 62, "Brazil": 63, "Austria": 64, "UK": 65, "Belgium": 66, "Czechia": 67, "Cuba": 68, "Colombia": 69, "Eritrea": 70, "Saint Lucia": 71, "Germany": 72, "Venezuela": 73, "Costa Rica": 74, "Guinea-Bissau": 75, "Finland": 76, "Tunisia": 77, "Albania": 78, "Kyrgyzstan": 79, "Trinidad and Tobago": 80, "Jamaica": 81, "North Korea": 82, "Haiti": 83, "Guinea": 84, "Angola": 85, "Zambia": 86, "Ireland": 87, "Tanzania": 88, "Djibouti": 89, "Sudan": 90, "Uganda": 91, "Guatemala": 92, "Democratic Republic of Congo": 93, "Australia": 94, "Fiji": 95, "Argentina": 96, "Palestine": 97, "Canada": 98, "Burundi": 99, "Switzerland": 100, "Micronesia": 100, "Netherlands": 100, "Liechtenstein": 100, "New Zealand": 100, "Chile": 100, "Denmark": 100, "Sao Tome and Principe": 100, "Dominican Republic": 100, "Kenya": 100, "Peru": 100, "Myanmar": 100, "Israel": 100, "Gambia": 100, "Burkina Faso": 100, "Cameroon": 100, "Botswana": 100, "Ecuador": 100, "Mongolia": 100, "Sierra Leone": 100, "Philippines": 100, "South Korea": 100, "Turkey": 100, "Mauritius": 100, "Liberia": 100, "Ghana": 100, "Suriname": 100, "Republic of Congo": 100, "Dominica": 100, "Panama": 100, "Syria": 100, "Somalia": 100, "Bolivia": 100, "Ethiopia": 100, "Grenada": 100, "Paraguay": 100, "Benin": 100, "Madagascar": 100, "Chad": 100, "Iraq": 100, "Indonesia": 100, "USA": 100, "Slovenia": 100, "Laos": 100, "Comoros": 100, "Togo": 100, "Luxembourg": 100, "Honduras": 100, "Samoa": 100, "Sweden": 100, "Cyprus": 100, "Norway": 100, "East Timor": 100, "Morocco": 100, "Uzbekistan": 100, "Mali": 100, "Belize": 100, "Vanuatu": 100, "Afghanistan": 100, "Egypt": 100, "Nigeria": 100, "Yemen": 100, "Pakistan": 100, "Gabon": 100, "Niger": 100, "Iran": 100, "Senegal": 100, "Libya": 100, "Cape Verde": 100, "Côte d'Ivoire": 100, "Nauru": 100, "Saint Vincent and the Grenadines": 100, "China": 100, "Algeria": 100, "Andorra": 100, "Solomon Islands": 100, "Tuvalu": 100, "Iceland": 100, "Marshall Islands": 100, "Papua New Guinea": 100, "Jordan": 100, "India": 100, "Singapore": 100, "Malta": 100, "Malaysia": 100, "Equatorial Guinea": 100, "Brunei": 100, "Bhutan": 100, "Palau": 100, "Seychelles": 100, "Saudi Arabia": 100, "Kuwait": 100, "Maldives": 100, "Bahrain": 100, "Oman": 100, "United Arab Emirates": 100, "Qatar": 100, "Cook Islands": 100}, "% Male": {"Qatar": 1, "United Arab Emirates": 2, "Oman": 3, "Bahrain": 4, "Maldives": 5, "Kuwait": 6, "Saudi Arabia": 7, "Seychelles": 8, "Palau": 9, "Bhutan": 10, "Brunei": 11, "Equatorial Guinea": 12, "Malaysia": 13, "Malta": 14, "Singapore": 15, "India": 16, "Jordan": 17, "Papua New Guinea": 18, "Marshall Islands": 19, "Iceland": 20, "Tuvalu": 21, "Solomon Islands": 22, "Andorra": 23, "Algeria": 24, "China": 25, "Saint Vincent and the Grenadines": 26, "Nauru": 27, "Côte d'Ivoire": 28, "Cape Verde": 29, "Libya": 30, "Senegal": 31, "Iran": 32, "Niger": 33, "Gabon": 34, "Pakistan": 35, "Yemen": 36, "Nigeria": 37, "Egypt": 38, "Afghanistan": 39, "Vanuatu": 40, "Belize": 41, "Mali": 42, "Uzbekistan": 43, "Morocco": 44, "East Timor": 45, "Norway": 46, "Cyprus": 47, "Sweden": 48, "Samoa": 49, "Honduras": 50, "Luxembourg": 51, "Togo": 52, "Comoros": 53, "Laos": 54, "Slovenia": 55, "USA": 56, "Indonesia": 57, "Iraq": 58, "Chad": 59, "Madagascar": 60, "Benin": 61, "Paraguay": 62, "Grenada": 63, "Ethiopia": 64, "Bolivia": 65, "Somalia": 66, "Syria": 67, "Panama": 68, "Dominica": 69, "Republic of Congo": 70, "Suriname": 71, "Ghana": 72, "Liberia": 73, "Mauritius": 74, "Turkey": 75, "South Korea": 76, "Philippines": 77, "Sierra Leone": 78, "Mongolia": 79, "Ecuador": 80, "Botswana": 81, "Cameroon": 82, "Burkina Faso": 83, "Gambia": 84, "Israel": 85, "Myanmar": 86, "Peru": 87, "Kenya": 88, "Dominican Republic": 89, "Sao Tome and Principe": 90, "Denmark": 91, "Chile": 92, "New Zealand": 93, "Liechtenstein": 94, "Netherlands": 95, "Micronesia": 96, "Switzerland": 97, "Burundi": 98, "Canada": 99, "Palestine": 100, "Argentina": 100, "Fiji": 100, "Australia": 100, "Democratic Republic of Congo": 100, "Guatemala": 100, "Uganda": 100, "Sudan": 100, "Djibouti": 100, "Tanzania": 100, "Ireland": 100, "Zambia": 100, "Angola": 100, "Guinea": 100, "Haiti": 100, "North Korea": 100, "Jamaica": 100, "Trinidad and Tobago": 100, "Kyrgyzstan": 100, "Albania": 100, "Tunisia": 100, "Finland": 100, "Guinea-Bissau": 100, "Costa Rica": 100, "Venezuela": 100, "Germany": 100, "Saint Lucia": 100, "Eritrea": 100, "Colombia": 100, "Cuba": 100, "Czechia": 100, "Belgium": 100, "UK": 100, "Austria": 100, "Brazil": 100, "Nicaragua": 100, "Kosovo": 100, "South Sudan": 100, "Bangladesh": 100, "San Marino": 100, "Tajikistan": 100, "Swaziland": 100, "Spain": 100, "Turkmenistan": 100, "Mauritania": 100, "Azerbaijan": 100, "Cambodia": 100, "Vietnam": 100, "Monaco": 100, "Italy": 100, "Namibia": 100, "Slovakia": 100, "Malawi": 100, "Japan": 100, "Rwanda": 100, "Lesotho": 100, "Kazakhstan": 100, "Thailand": 100, "Guyana": 100, "South Africa": 100, "North Macedonia": 100, "Lebanon": 100, "Kiribati": 100, "Mozambique": 100, "Uruguay": 100, "Mexico": 100, "France": 100, "Poland": 100, "Greece": 100, "Romania": 100, "Bulgaria": 100, "Sri Lanka": 100, "Croatia": 100, "Montenegro": 100, "Hungary": 100, "Central African Republic": 100, "Barbados": 100, "Nepal": 100, "Saint Kitts and Nevis": 100, "Bahamas": 100, "Zimbabwe": 100, "Portugal": 100, "Antigua and Barbuda": 100, "Bosnia and Herzegovina": 100, "Estonia": 100, "El Salvador": 100, "Serbia": 100, "Tonga": 100, "Lithuania": 100, "Georgia": 100, "Belarus": 100, "Ukraine": 100, "Armenia": 100, "Russia": 100, "Latvia": 100, "Moldova": 100, "Hong Kong": 100, "Cook Islands": 100}, "Fruit Consumption per Capita": {"Dominica": 1, "Dominican Republic": 2, "Bahamas": 3, "Guyana": 4, "Antigua and Barbuda": 5, "Saint Kitts and Nevis": 6, "Papua New Guinea": 7, "Saint Vincent and the Grenadines": 8, "Sao Tome and Principe": 9, "Albania": 10, "Uganda": 11, "Rwanda": 12, "USA": 13, "Ghana": 14, "Bosnia and Herzegovina": 15, "Maldives": 16, "Serbia": 17, "Samoa": 18, "Netherlands": 19, "Greece": 20, "Malawi": 21, "Panama": 22, "Grenada": 23, "Luxembourg": 24, "Oman": 25, "Bahrain": 26, "Jamaica": 27, "Colombia": 28, "Iceland": 29, "Seychelles": 30, "Austria": 31, "Turkey": 32, "North Macedonia": 33, "Cuba": 34, "Norway": 35, "Peru": 36, "Portugal": 37, "Gabon": 38, "Saint Lucia": 39, "Italy": 40, "Canada": 41, "Iran": 42, "Denmark": 43, "Mexico": 44, "Slovenia": 45, "Israel": 46, "Switzerland": 47, "France": 48, "Montenegro": 49, "Laos": 50, "Armenia": 51, "Tunisia": 52, "Morocco": 53, "Barbados": 54, "Ireland": 55, "Saudi Arabia": 56, "China": 57, "Finland": 58, "Uzbekistan": 59, "UK": 60, "Moldova": 61, "Kuwait": 62, "Qatar": 63, "Uruguay": 64, "Sweden": 65, "Tuvalu": 66, "Brazil": 67, "Romania": 68, "Algeria": 69, "Croatia": 70, "Comoros": 71, "Guinea": 72, "Guatemala": 73, "Belgium": 74, "Germany": 75, "Cameroon": 76, "Azerbaijan": 77, "Costa Rica": 78, "Haiti": 79, "Lebanon": 80, "Estonia": 81, "Tonga": 82, "Venezuela": 83, "Libya": 84, "Nauru": 85, "Vietnam": 86, "Philippines": 87, "El Salvador": 88, "New Zealand": 89, "Cyprus": 90, "Spain": 91, "Bolivia": 92, "Malta": 93, "Syria": 94, "Suriname": 95, "Hungary": 96, "Czechia": 97, "Mali": 98, "Indonesia": 99, "Australia": 100, "Paraguay": 100, "Trinidad and Tobago": 100, "Hong Kong": 100, "Angola": 100, "Swaziland": 100, "Egypt": 100, "United Arab Emirates": 100, "Belarus": 100, "Marshall Islands": 100, "Vanuatu": 100, "Russia": 100, "Sri Lanka": 100, "Argentina": 100, "Burundi": 100, "Kazakhstan": 100, "Thailand": 100, "Nigeria": 100, "Bulgaria": 100, "Poland": 100, "Slovakia": 100, "Ecuador": 100, "Kiribati": 100, "Lithuania": 100, "Tanzania": 100, "Malaysia": 100, "Fiji": 100, "Chile": 100, "Latvia": 100, "India": 100, "Georgia": 100, "Côte d'Ivoire": 100, "Kenya": 100, "Cape Verde": 100, "Sudan": 100, "Burkina Faso": 100, "Nepal": 100, "Namibia": 100, "Iraq": 100, "Mauritius": 100, "Democratic Republic of Congo": 100, "Central African Republic": 100, "South Korea": 100, "Botswana": 100, "Turkmenistan": 100, "Nicaragua": 100, "Guinea-Bissau": 100, "Honduras": 100, "Belize": 100, "Ukraine": 100, "Japan": 100, "Republic of Congo": 100, "Benin": 100, "Myanmar": 100, "Bhutan": 100, "South Sudan": 100, "Mongolia": 100, "Jordan": 100, "Liberia": 100, "Madagascar": 100, "South Africa": 100, "Tajikistan": 100, "Afghanistan": 100, "Kyrgyzstan": 100, "Djibouti": 100, "Solomon Islands": 100, "Sierra Leone": 100, "Bangladesh": 100, "Yemen": 100, "Pakistan": 100, "Micronesia": 100, "Mauritania": 100, "Niger": 100, "Lesotho": 100, "East Timor": 100, "Mozambique": 100, "Senegal": 100, "Zimbabwe": 100, "Somalia": 100, "Cambodia": 100, "Ethiopia": 100, "Chad": 100, "Gambia": 100, "Togo": 100, "Zambia": 100, "Andorra": 100, "Brunei": 100, "Cook Islands": 100, "Eritrea": 100, "Equatorial Guinea": 100, "Liechtenstein": 100, "Monaco": 100, "Kosovo": 100, "Palau": 100, "North Korea": 100, "Palestine": 100, "Singapore": 100, "San Marino": 100}, "Political Polarisation": {"Myanmar": 1, "Turkey": 2, "Poland": 3, "Belarus": 4, "Bangladesh": 5, "Nicaragua": 6, "Yemen": 7, "Hungary": 8, "Libya": 9, "Peru": 10, "Romania": 11, "Slovenia": 12, "Afghanistan": 13, "South Sudan": 14, "Bolivia": 15, "Venezuela": 16, "Madagascar": 17, "Armenia": 18, "India": 19, "Cameroon": 20, "Mexico": 21, "Chad": 22, "Argentina": 23, "Colombia": 24, "Malaysia": 25, "Bahrain": 26, "Ukraine": 27, "USA": 28, "Georgia": 29, "Guinea": 30, "Swaziland": 31, "Liberia": 32, "Brazil": 33, "Comoros": 34, "Iraq": 35, "Burkina Faso": 36, "Azerbaijan": 37, "El Salvador": 38, "Hong Kong": 39, "Russia": 40, "France": 41, "Zimbabwe": 42, "Central African Republic": 43, "Mozambique": 44, "South Korea": 45, "Bosnia and Herzegovina": 46, "Kosovo": 47, "Serbia": 48, "Iran": 49, "Lebanon": 50, "Burundi": 51, "Tunisia": 52, "Moldova": 53, "Slovakia": 54, "Pakistan": 55, "Eritrea": 56, "Montenegro": 57, "Thailand": 58, "Nepal": 59, "Cambodia": 60, "Côte d'Ivoire": 61, "Ethiopia": 62, "Mali": 63, "Maldives": 64, "Somalia": 65, "North Macedonia": 66, "Sudan": 67, "Indonesia": 68, "Malta": 69, "Equatorial Guinea": 70, "Guyana": 71, "Ecuador": 72, "Kenya": 73, "Croatia": 74, "Togo": 75, "Cyprus": 76, "Haiti": 77, "Seychelles": 78, "Philippines": 79, "Bulgaria": 80, "Syria": 81, "Guatemala": 82, "Honduras": 83, "Djibouti": 84, "Guinea-Bissau": 85, "Kazakhstan": 86, "Italy": 87, "Spain": 88, "Mauritius": 89, "Sri Lanka": 90, "Uganda": 91, "Malawi": 92, "Lesotho": 93, "Sierra Leone": 94, "Mongolia": 95, "Israel": 96, "Senegal": 97, "Egypt": 98, "Netherlands": 99, "China": 100, "Suriname": 100, "Benin": 100, "Germany": 100, "Republic of Congo": 100, "South Africa": 100, "Austria": 100, "UK": 100, "Kyrgyzstan": 100, "Portugal": 100, "Namibia": 100, "Gabon": 100, "Belgium": 100, "Canada": 100, "Czechia": 100, "Niger": 100, "Chile": 100, "Ghana": 100, "Democratic Republic of Congo": 100, "Sweden": 100, "Nigeria": 100, "Jamaica": 100, "Cape Verde": 100, "Albania": 100, "Cuba": 100, "Iceland": 100, "Zambia": 100, "Costa Rica": 100, "Paraguay": 100, "New Zealand": 100, "Gambia": 100, "Morocco": 100, "Angola": 100, "East Timor": 100, "Bhutan": 100, "Dominican Republic": 100, "Vietnam": 100, "Tanzania": 100, "North Korea": 100, "Jordan": 100, "Panama": 100, "Solomon Islands": 100, "Australia": 100, "Kuwait": 100, "Uzbekistan": 100, "Estonia": 100, "Lithuania": 100, "Papua New Guinea": 100, "Finland": 100, "Singapore": 100, "Greece": 100, "Latvia": 100, "Mauritania": 100, "Tajikistan": 100, "Laos": 100, "United Arab Emirates": 100, "Switzerland": 100, "Algeria": 100, "Fiji": 100, "Rwanda": 100, "Uruguay": 100, "Denmark": 100, "Luxembourg": 100, "Saudi Arabia": 100, "Japan": 100, "Barbados": 100, "Qatar": 100, "Trinidad and Tobago": 100, "Norway": 100, "Sao Tome and Principe": 100, "Botswana": 100, "Turkmenistan": 100, "Ireland": 100, "Oman": 100, "Andorra": 100, "Antigua and Barbuda": 100, "Bahamas": 100, "Belize": 100, "Brunei": 100, "Cook Islands": 100, "Dominica": 100, "Micronesia": 100, "Grenada": 100, "Kiribati": 100, "Saint Kitts and Nevis": 100, "Saint Lucia": 100, "Liechtenstein": 100, "Monaco": 100, "Marshall Islands": 100, "Nauru": 100, "Palau": 100, "Palestine": 100, "San Marino": 100, "Tonga": 100, "Tuvalu": 100, "Saint Vincent and the Grenadines": 100, "Vanuatu": 100, "Samoa": 100}, "Railway Journeys (total km)": {"China": 1, "Japan": 2, "India": 3, "Russia": 4, "South Korea": 5, "France": 6, "Germany": 7, "Egypt": 8, "Indonesia": 9, "Italy": 10, "Pakistan": 11, "UK": 12, "Spain": 13, "Brazil": 14, "Poland": 15, "Switzerland": 16, "USA": 17, "Iran": 18, "Netherlands": 19, "Ukraine": 20, "Turkey": 21, "Bangladesh": 22, "Australia": 23, "Kazakhstan": 24, "Austria": 25, "Argentina": 26, "Sweden": 27, "Sri Lanka": 28, "Belgium": 29, "Czechia": 30, "Denmark": 31, "Thailand": 32, "Romania": 33, "Hungary": 34, "Belarus": 35, "Morocco": 36, "Myanmar": 37, "South Africa": 38, "Uzbekistan": 39, "Portugal": 40, "Finland": 41, "Turkmenistan": 42, "Slovakia": 43, "Israel": 44, "Norway": 45, "Vietnam": 46, "Cuba": 47, "Syria": 48, "Bulgaria": 49, "Malaysia": 50, "Ireland": 51, "New Zealand": 52, "Chile": 53, "Greece": 54, "Tunisia": 55, "Slovenia": 56, "Croatia": 57, "Canada": 58, "Jordan": 59, "Tanzania": 60, "Mexico": 61, "Philippines": 62, "Latvia": 63, "Algeria": 64, "Lithuania": 65, "Luxembourg": 66, "Estonia": 67, "Georgia": 68, "Republic of Congo": 69, "Mozambique": 70, "Cameroon": 71, "Mali": 72, "Serbia": 73, "Nigeria": 74, "Djibouti": 75, "Saudi Arabia": 76, "Senegal": 77, "Peru": 78, "Kenya": 79, "Azerbaijan": 80, "Iraq": 81, "Botswana": 82, "Mongolia": 83, "Gabon": 84, "Ghana": 85, "Sudan": 86, "Benin": 87, "Armenia": 88, "Mauritania": 89, "Cambodia": 90, "Malawi": 91, "Montenegro": 92, "North Macedonia": 93, "Moldova": 94, "Tajikistan": 95, "Kyrgyzstan": 96, "Zimbabwe": 97, "Bosnia and Herzegovina": 98, "Venezuela": 99, "Côte d'Ivoire": 100, "Madagascar": 100, "Uruguay": 100, "Democratic Republic of Congo": 100, "El Salvador": 100, "Zambia": 100, "Albania": 100, "Swaziland": 100, "Afghanistan": 100, "Angola": 100, "Andorra": 100, "United Arab Emirates": 100, "Antigua and Barbuda": 100, "Burundi": 100, "Burkina Faso": 100, "Bahrain": 100, "Bahamas": 100, "Belize": 100, "Bolivia": 100, "Barbados": 100, "Brunei": 100, "Bhutan": 100, "Central African Republic": 100, "Cook Islands": 100, "Colombia": 100, "Comoros": 100, "Cape Verde": 100, "Costa Rica": 100, "Cyprus": 100, "Dominica": 100, "Dominican Republic": 100, "Ecuador": 100, "Eritrea": 100, "Ethiopia": 100, "Fiji": 100, "Micronesia": 100, "Guinea": 100, "Gambia": 100, "Guinea-Bissau": 100, "Equatorial Guinea": 100, "Grenada": 100, "Guatemala": 100, "Guyana": 100, "Hong Kong": 100, "Honduras": 100, "Haiti": 100, "Iceland": 100, "Jamaica": 100, "Kiribati": 100, "Saint Kitts and Nevis": 100, "Kuwait": 100, "Laos": 100, "Lebanon": 100, "Liberia": 100, "Libya": 100, "Saint Lucia": 100, "Liechtenstein": 100, "Lesotho": 100, "Monaco": 100, "Maldives": 100, "Marshall Islands": 100, "Malta": 100, "Mauritius": 100, "Namibia": 100, "Niger": 100, "Nicaragua": 100, "Nepal": 100, "Nauru": 100, "Oman": 100, "Kosovo": 100, "Panama": 100, "Palau": 100, "Papua New Guinea": 100, "North Korea": 100, "Paraguay": 100, "Palestine": 100, "Qatar": 100, "Rwanda": 100, "Singapore": 100, "Solomon Islands": 100, "Sierra Leone": 100, "San Marino": 100, "Somalia": 100, "South Sudan": 100, "Sao Tome and Principe": 100, "Suriname": 100, "Seychelles": 100, "Chad": 100, "Togo": 100, "East Timor": 100, "Tonga": 100, "Trinidad and Tobago": 100, "Tuvalu": 100, "Uganda": 100, "Saint Vincent and the Grenadines": 100, "Vanuatu": 100, "Samoa": 100, "Yemen": 100}};
+
+const countries = [
+"Afghanistan","Albania","Algeria","Andorra","Angola","Antigua and Barbuda","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Canada","Cape Verde","Central African Republic","Chad","Chile","China","Colombia","Comoros","Cook Islands","Costa Rica","Côte d'Ivoire","Croatia","Cuba","Cyprus","Czechia","Democratic Republic of Congo","Denmark","Djibouti","Dominica","Dominican Republic","East Timor","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hong Kong","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kosovo","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar","Republic of Congo","Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Swaziland","Sweden","Switzerland","Syria","Tajikistan","Tanzania","Thailand","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","UK","Ukraine","United Arab Emirates","Uruguay","USA","Uzbekistan","Vanuatu","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"
+];
+
+const categoryNames = Object.keys(data);
+const maxRounds = categoryNames.length;
+
+let usedCountries = new Set();
+let chosenCategories = new Set();
+let currentCountry = null;
+let totalScore = 0;
+let rounds = 0;
+
+const genBtn = document.getElementById('genBtn');
+const currentCountryEl = document.getElementById('currentCountry');
+const catsEl = document.getElementById('cats');
+const totalScoreEl = document.getElementById('totalScore');
+const roundsDoneEl = document.getElementById('roundsDone');
+const logEl = document.getElementById('log');
+
+function renderCategoryButtons(){
+  catsEl.innerHTML = '';
+  categoryNames.forEach((cat, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn';
+    btn.textContent = cat;
+    btn.disabled = false;
+    if(chosenCategories.has(cat)){
+      btn.classList.add('disabled');
+      btn.disabled = true;
+    }
+    btn.addEventListener('click', () => onCategoryClick(cat, btn));
+    catsEl.appendChild(btn);
+  });
+}
+
+function log(msg){
+  const p = document.createElement('div');
+  p.textContent = msg;
+  logEl.prepend(p);
+}
+
+function pickRandomCountry(){
+  const pool = countries.filter(c => !usedCountries.has(c));
+  if(pool.length === 0) return null;
+  const i = Math.floor(Math.random() * pool.length);
+  return pool[i];
+}
+
+genBtn.addEventListener('click', () => {
+  if(usedCountries.size >= maxRounds){
+    alert('All rounds completed. Refresh to start again.');
+    return;
+  }
+  const next = pickRandomCountry();
+  if(!next){
+    alert('No more countries available.');
+    return;
+  }
+  currentCountry = next;
+  currentCountryEl.textContent = currentCountry;
+  log(`Generated country: ${currentCountry}`);
+});
+
+function lookupScore(mapping, country){
+  // exact match
+  if(mapping.hasOwnProperty(country)) return mapping[country];
+  // try case-insensitive match
+  const lower = Object.keys(mapping).find(k => k.toLowerCase() === country.toLowerCase());
+  if(lower) return mapping[lower];
+  // try match by ISO code if mapping uses codes (e.g., 'ZAF' for South Africa)
+  // build reverse map of common codes from mapping keys that are 3-letter uppercase
+  const codeKey = Object.keys(mapping).find(k => k === country.toUpperCase());
+  if(codeKey) return mapping[codeKey];
+  // try fuzzy: match by stripped non-alphanumeric and compare
+  const strip = s => s.toLowerCase().replace(/[^a-z0-9]/g,'');
+  const sCountry = strip(country);
+  const fuzzyKey = Object.keys(mapping).find(k => strip(k) === sCountry);
+  if(fuzzyKey) return mapping[fuzzyKey];
+  return undefined;
+}
+
+function onCategoryClick(cat, btn){
+  if(!currentCountry){
+    alert('Please generate a country first.');
+    return;
+  }
+  if(chosenCategories.has(cat)) return;
+  const mapping = data[cat] || {};
+  let sc = lookupScore(mapping, currentCountry);
+  if(sc === undefined){
+    sc = 0;
+    log(`No score found for ${currentCountry} in "${cat}" — assigned 0.`);
+  } else {
+    log(`Scored ${sc} for ${currentCountry} in "${cat}".`);
+  }
+  totalScore += Number(sc) || 0;
+  totalScoreEl.textContent = totalScore;
+  rounds += 1;
+  roundsDoneEl.textContent = `${rounds}`;
+  chosenCategories.add(cat);
+  usedCountries.add(currentCountry);
+  btn.classList.add('disabled');
+  btn.disabled = true;
+  currentCountry = null;
+  currentCountryEl.textContent = 'No country yet';
+  if(rounds >= maxRounds){
+    log(`Game complete! Final score: ${totalScore}`);
+    alert('Game complete! Final score: ' + totalScore + '. Refresh the page to play again.');
+    genBtn.disabled = true;
+  }
+}
+
+renderCategoryButtons();
+log('Welcome to GeoToby — click "Country Generator Button" to start.');
+
+</script>
+
+</div>
+<script>
+
+const data = {"Fish Consumption per Capita": {"Iceland": 1, "Maldives": 2, "Kiribati": 3, "Hong Kong": 4, "South Korea": 5, "Tuvalu": 6, "Antigua and Barbuda": 7, "Portugal": 8, "Malaysia": 9, "Norway": 10, "Micronesia": 11, "Marshall Islands": 12, "Japan": 13, "Samoa": 14, "Seychelles": 15, "Barbados": 16, "China": 17, "Indonesia": 18, "Myanmar": 19, "Vietnam": 20, "Cambodia": 21, "Spain": 22, "Saint Kitts and Nevis": 23, "Saint Lucia": 24, "France": 25, "Grenada": 26, "Finland": 27, "Solomon Islands": 28, "Luxembourg": 29, "Sweden": 30, "Vanuatu": 31, "Malta": 32, "Oman": 33, "Mauritius": 34, "Italy": 35, "Fiji": 36, "Lithuania": 37, "Thailand": 38, "Tonga": 39, "Bahamas": 40, "Gabon": 41, "Jamaica": 42, "Peru": 43, "Philippines": 44, "Nauru": 45, "Sao Tome and Principe": 46, "Bangladesh": 47, "Dominica": 48, "Israel": 49, "Laos": 50, "Sierra Leone": 51, "Guyana": 52, "New Zealand": 53, "Latvia": 54, "Australia": 55, "Ghana": 56, "Belgium": 57, "United Arab Emirates": 58, "Republic of Congo": 59, "Sri Lanka": 60, "Russia": 61, "Denmark": 62, "Qatar": 63, "USA": 64, "Croatia": 65, "Egypt": 66, "Gambia": 67, "Bahrain": 68, "Canada": 69, "Saint Vincent and the Grenadines": 70, "Ireland": 71, "Côte d'Ivoire": 72, "Greece": 73, "Netherlands": 74, "Libya": 75, "Trinidad and Tobago": 76, "Cyprus": 77, "Cameroon": 78, "Costa Rica": 79, "UK": 80, "Belize": 81, "Comoros": 82, "Morocco": 83, "Suriname": 84, "Switzerland": 85, "Tunisia": 86, "Uganda": 87, "Ukraine": 88, "Panama": 89, "Benin": 90, "Moldova": 91, "Chile": 92, "Austria": 93, "Senegal": 94, "Kuwait": 95, "Mexico": 96, "Saudi Arabia": 97, "Zambia": 98, "Mozambique": 99, "Germany": 100, "Slovenia": 100, "Estonia": 100, "Angola": 100, "Belarus": 100, "Montenegro": 100, "Uruguay": 100, "Iran": 100, "Poland": 100, "Guinea": 100, "Burkina Faso": 100, "Cape Verde": 100, "Czechia": 100, "Georgia": 100, "Venezuela": 100, "Slovakia": 100, "Namibia": 100, "Malawi": 100, "India": 100, "Colombia": 100, "Mali": 100, "Albania": 100, "Togo": 100, "Serbia": 100, "Brazil": 100, "Dominican Republic": 100, "Romania": 100, "North Macedonia": 100, "Mauritania": 100, "Bulgaria": 100, "El Salvador": 100, "Papua New Guinea": 100, "Argentina": 100, "Nigeria": 100, "East Timor": 100, "Tanzania": 100, "Nicaragua": 100, "Ecuador": 100, "Hungary": 100, "Bhutan": 100, "Cuba": 100, "South Africa": 100, "Bosnia and Herzegovina": 100, "Chad": 100, "Paraguay": 100, "Turkey": 100, "Rwanda": 100, "Armenia": 100, "Haiti": 100, "Liberia": 100, "Jordan": 100, "Lebanon": 100, "Honduras": 100, "Uzbekistan": 100, "Swaziland": 100, "Djibouti": 100, "Madagascar": 100, "Kazakhstan": 100, "Nepal": 100, "Democratic Republic of Congo": 100, "Guatemala": 100, "South Sudan": 100, "Kenya": 100, "Algeria": 100, "Zimbabwe": 100, "Turkmenistan": 100, "Guinea-Bissau": 100, "Burundi": 100, "Iraq": 100, "Botswana": 100, "Yemen": 100, "Bolivia": 100, "Azerbaijan": 100, "Lesotho": 100, "Niger": 100, "Syria": 100, "Somalia": 100, "Kyrgyzstan": 100, "Pakistan": 100, "Mongolia": 100, "Tajikistan": 100, "Sudan": 100, "Ethiopia": 100, "Afghanistan": 100, "Andorra": 100, "Brunei": 100, "Central African Republic": 100, "Cook Islands": 100, "Eritrea": 100, "Equatorial Guinea": 100, "Liechtenstein": 100, "Monaco": 100, "Kosovo": 100, "Palau": 100, "North Korea": 100, "Palestine": 100, "Singapore": 100, "San Marino": 100}, "Olympics 2012": {"USA": 1, "China": 2, "Russia": 3, "UK": 4, "Germany": 5, "Japan": 6, "Australia": 7, "France": 8, "South Korea": 9, "Italy": 10, "Netherlands": 11, "Ukraine": 12, "Canada": 13, "Hungary": 14, "Spain": 15, "Brazil": 16, "Cuba": 17, "Kazakhstan": 18, "New Zealand": 19, "Iran": 20, "Jamaica": 21, "Belarus": 22, "Kenya": 23, "Czechia": 24, "Azerbaijan": 25, "Poland": 25, "Romania": 27, "Denmark": 28, "Sweden": 29, "Colombia": 30, "Ethiopia": 31, "Georgia": 32, "Mexico": 32, "North Korea": 34, "South Africa": 35, "Croatia": 36, "India": 37, "Turkey": 38, "Lithuania": 39, "Ireland": 40, "Mongolia": 41, "Switzerland": 42, "Norway": 43, "Argentina": 44, "Serbia": 44, "Slovenia": 44, "Trinidad and Tobago": 47, "Uzbekistan": 47, "Slovakia": 49, "Tunisia": 50, "Thailand": 51, "Armenia": 52, "Belgium": 52, "Finland": 52, "Dominican Republic": 55, "Latvia": 56, "Egypt": 57, "Bulgaria": 58, "Estonia": 58, "Indonesia": 58, "Malaysia": 58, "Greece": 62, "Moldova": 62, "Qatar": 62, "Singapore": 62, "Bahamas": 66, "Algeria": 66, "Grenada": 66, "Uganda": 66, "Venezuela": 66, "Botswana": 71, "Cyprus": 71, "Gabon": 71, "Guatemala": 71, "Montenegro": 71, "Portugal": 71, "Afghanistan": 77, "Bahrain": 77, "Hong Kong": 77, "Kuwait": 77, "Morocco": 77, "Saudi Arabia": 77, "Tajikistan": 77, "Angola": 84, "Albania": 84, "Andorra": 84, "United Arab Emirates": 84, "Antigua and Barbuda": 84, "Austria": 84, "Burundi": 84, "Benin": 84, "Burkina Faso": 84, "Bangladesh": 84, "Bosnia and Herzegovina": 84, "Belize": 84, "Bolivia": 84, "Barbados": 84, "Brunei": 84, "Bhutan": 84, "Central African Republic": 84, "Chile": 84, "Côte d'Ivoire": 84, "Cameroon": 84, "Democratic Republic of Congo": 84, "Republic of Congo": 84, "Comoros": 84, "Cape Verde": 84, "Costa Rica": 84, "Djibouti": 84, "Dominica": 84, "Ecuador": 84, "Eritrea": 84, "Fiji": 84, "Micronesia": 84, "Ghana": 84, "Guinea": 84, "Gambia": 84, "Guinea-Bissau": 84, "Equatorial Guinea": 84, "Guyana": 84, "Honduras": 84, "Haiti": 84, "Iraq": 84, "Iceland": 84, "Israel": 84, "Jordan": 84, "Kyrgyzstan": 84, "Cambodia": 84, "Kiribati": 84, "Saint Kitts and Nevis": 84, "Laos": 84, "Lebanon": 84, "Liberia": 84, "Libya": 84, "Saint Lucia": 84, "Liechtenstein": 84, "Sri Lanka": 84, "Lesotho": 84, "Luxembourg": 84, "Monaco": 84, "Madagascar": 84, "Maldives": 84, "Marshall Islands": 84, "North Macedonia": 84, "Mali": 84, "Malta": 84, "Myanmar": 84, "Mozambique": 84, "Mauritania": 84, "Mauritius": 84, "Malawi": 84, "Namibia": 84, "Niger": 84, "Nigeria": 84, "Nicaragua": 84, "Nepal": 84, "Nauru": 84, "Oman": 84, "Pakistan": 84, "Panama": 84, "Peru": 84, "Philippines": 84, "Palau": 84, "Papua New Guinea": 84, "Paraguay": 84, "Palestine": 84, "Rwanda": 84, "Sudan": 84, "Senegal": 84, "Solomon Islands": 84, "Sierra Leone": 84, "El Salvador": 84, "San Marino": 84, "Somalia": 84, "Sao Tome and Principe": 84, "Suriname": 84, "Swaziland": 84, "Seychelles": 84, "Syria": 84, "Chad": 84, "Togo": 84, "Turkmenistan": 84, "East Timor": 84, "Tonga": 84, "Tuvalu": 84, "Tanzania": 84, "Uruguay": 84, "Saint Vincent and the Grenadines": 84, "Vietnam": 84, "Vanuatu": 84, "Samoa": 84, "Yemen": 84, "Zambia": 84, "Zimbabwe": 84, "Cook Islands": 100, "Kosovo": 100, "South Sudan": 100}, "CO2 Emissions per Capita": {"Qatar": 1, "Kuwait": 2, "Brunei": 3, "Bahrain": 4, "Trinidad and Tobago": 5, "Saudi Arabia": 6, "United Arab Emirates": 7, "Oman": 8, "Australia": 9, "USA": 10, "Kazakhstan": 11, "Canada": 12, "Mongolia": 13, "Palau": 14, "Russia": 15, "South Korea": 16, "Turkmenistan": 17, "Luxembourg": 18, "Iceland": 19, "Singapore": 20, "Libya": 21, "China": 22, "Iran": 23, "Malaysia": 24, "Japan": 25, "Bahamas": 26, "Belgium": 27, "Antigua and Barbuda": 28, "Poland": 29, "Czechia": 30, "South Africa": 31, "Germany": 32, "Norway": 33, "Ireland": 34, "Netherlands": 35, "Serbia": 36, "New Zealand": 37, "Austria": 38, "Belarus": 39, "Bosnia and Herzegovina": 40, "Estonia": 41, "Slovenia": 42, "Turkey": 43, "Cook Islands": 44, "Israel": 45, "Saint Kitts and Nevis": 46, "Guyana": 47, "Cyprus": 48, "Greece": 49, "Finland": 50, "Slovakia": 51, "Andorra": 52, "Nauru": 53, "Italy": 54, "Iraq": 55, "Seychelles": 56, "Barbados": 57, "Kosovo": 58, "Croatia": 59, "Denmark": 60, "Suriname": 61, "Bulgaria": 62, "Spain": 63, "UK": 64, "Hong Kong": 65, "Lithuania": 66, "Maldives": 67, "Algeria": 68, "Hungary": 69, "Marshall Islands": 70, "Venezuela": 71, "Chile": 72, "France": 73, "Azerbaijan": 74, "Uzbekistan": 75, "Ukraine": 76, "Argentina": 77, "Thailand": 78, "Montenegro": 79, "Equatorial Guinea": 80, "Mauritius": 81, "Vietnam": 82, "North Macedonia": 83, "Romania": 84, "Switzerland": 85, "Sweden": 86, "Mexico": 87, "Latvia": 88, "Portugal": 89, "Liechtenstein": 90, "Grenada": 91, "Malta": 92, "Laos": 93, "Georgia": 94, "Saint Lucia": 95, "Botswana": 96, "Jamaica": 97, "Dominican Republic": 98, "Indonesia": 99, "Panama": 100, "Lebanon": 100, "Tunisia": 100, "Dominica": 100, "Saint Vincent and the Grenadines": 100, "Ecuador": 100, "Armenia": 100, "North Korea": 100, "Uruguay": 100, "Bolivia": 100, "Brazil": 100, "Cuba": 100, "Egypt": 100, "India": 100, "Gabon": 100, "Bhutan": 100, "Peru": 100, "Jordan": 100, "Belize": 100, "Morocco": 100, "Moldova": 100, "Colombia": 100, "Costa Rica": 100, "Kyrgyzstan": 100, "Albania": 100, "Fiji": 100, "Philippines": 100, "Tonga": 100, "El Salvador": 100, "Republic of Congo": 100, "Micronesia": 100, "Syria": 100, "Cambodia": 100, "Honduras": 100, "Tuvalu": 100, "Paraguay": 100, "Namibia": 100, "Cape Verde": 100, "Samoa": 100, "Lesotho": 100, "Guatemala": 100, "Tajikistan": 100, "Mauritania": 100, "Sri Lanka": 100, "Palestine": 100, "Swaziland": 100, "Zimbabwe": 100, "Nicaragua": 100, "Papua New Guinea": 100, "Senegal": 100, "Pakistan": 100, "Comoros": 100, "Nepal": 100, "Bangladesh": 100, "Ghana": 100, "Sao Tome and Principe": 100, "Vanuatu": 100, "Angola": 100, "Nigeria": 100, "Myanmar": 100, "Zambia": 100, "Kiribati": 100, "Djibouti": 100, "East Timor": 100, "Côte d'Ivoire": 100, "Benin": 100, "Kenya": 100, "Solomon Islands": 100, "Sudan": 100, "Cameroon": 100, "Tanzania": 100, "Gambia": 100, "Togo": 100, "Mali": 100, "Burkina Faso": 100, "Guinea": 100, "Afghanistan": 100, "Haiti": 100, "Yemen": 100, "Mozambique": 100, "Eritrea": 100, "Sierra Leone": 100, "Guinea-Bissau": 100, "Liberia": 100, "Rwanda": 100, "South Sudan": 100, "Madagascar": 100, "Chad": 100, "Ethiopia": 100, "Uganda": 100, "Niger": 100, "Malawi": 100, "Central African Republic": 100, "Somalia": 100, "Burundi": 100, "Democratic Republic of Congo": 100, "Monaco": 100, "San Marino": 100}, "% Female": {"Hong Kong": 1, "Moldova": 2, "Latvia": 3, "Russia": 4, "Armenia": 5, "Ukraine": 6, "Belarus": 7, "Georgia": 8, "Lithuania": 9, "Tonga": 10, "Serbia": 11, "El Salvador": 12, "Estonia": 13, "Bosnia and Herzegovina": 14, "Antigua and Barbuda": 15, "Portugal": 16, "Zimbabwe": 17, "Bahamas": 18, "Saint Kitts and Nevis": 19, "Nepal": 20, "Barbados": 21, "Central African Republic": 22, "Hungary": 23, "Montenegro": 24, "Croatia": 25, "Sri Lanka": 26, "Bulgaria": 27, "Romania": 28, "Greece": 29, "Poland": 30, "France": 31, "Mexico": 32, "Uruguay": 33, "Mozambique": 34, "Kiribati": 35, "Lebanon": 36, "North Macedonia": 37, "South Africa": 38, "Guyana": 39, "Thailand": 40, "Kazakhstan": 41, "Lesotho": 42, "Rwanda": 43, "Japan": 44, "Malawi": 45, "Slovakia": 46, "Namibia": 47, "Italy": 48, "Monaco": 49, "Vietnam": 50, "Cambodia": 51, "Azerbaijan": 52, "Mauritania": 53, "Turkmenistan": 54, "Spain": 55, "Swaziland": 56, "Tajikistan": 57, "San Marino": 58, "Bangladesh": 59, "South Sudan": 60, "Kosovo": 61, "Nicaragua": 62, "Brazil": 63, "Austria": 64, "UK": 65, "Belgium": 66, "Czechia": 67, "Cuba": 68, "Colombia": 69, "Eritrea": 70, "Saint Lucia": 71, "Germany": 72, "Venezuela": 73, "Costa Rica": 74, "Guinea-Bissau": 75, "Finland": 76, "Tunisia": 77, "Albania": 78, "Kyrgyzstan": 79, "Trinidad and Tobago": 80, "Jamaica": 81, "North Korea": 82, "Haiti": 83, "Guinea": 84, "Angola": 85, "Zambia": 86, "Ireland": 87, "Tanzania": 88, "Djibouti": 89, "Sudan": 90, "Uganda": 91, "Guatemala": 92, "Democratic Republic of Congo": 93, "Australia": 94, "Fiji": 95, "Argentina": 96, "Palestine": 97, "Canada": 98, "Burundi": 99, "Switzerland": 100, "Micronesia": 100, "Netherlands": 100, "Liechtenstein": 100, "New Zealand": 100, "Chile": 100, "Denmark": 100, "Sao Tome and Principe": 100, "Dominican Republic": 100, "Kenya": 100, "Peru": 100, "Myanmar": 100, "Israel": 100, "Gambia": 100, "Burkina Faso": 100, "Cameroon": 100, "Botswana": 100, "Ecuador": 100, "Mongolia": 100, "Sierra Leone": 100, "Philippines": 100, "South Korea": 100, "Turkey": 100, "Mauritius": 100, "Liberia": 100, "Ghana": 100, "Suriname": 100, "Republic of Congo": 100, "Dominica": 100, "Panama": 100, "Syria": 100, "Somalia": 100, "Bolivia": 100, "Ethiopia": 100, "Grenada": 100, "Paraguay": 100, "Benin": 100, "Madagascar": 100, "Chad": 100, "Iraq": 100, "Indonesia": 100, "USA": 100, "Slovenia": 100, "Laos": 100, "Comoros": 100, "Togo": 100, "Luxembourg": 100, "Honduras": 100, "Samoa": 100, "Sweden": 100, "Cyprus": 100, "Norway": 100, "East Timor": 100, "Morocco": 100, "Uzbekistan": 100, "Mali": 100, "Belize": 100, "Vanuatu": 100, "Afghanistan": 100, "Egypt": 100, "Nigeria": 100, "Yemen": 100, "Pakistan": 100, "Gabon": 100, "Niger": 100, "Iran": 100, "Senegal": 100, "Libya": 100, "Cape Verde": 100, "Côte d'Ivoire": 100, "Nauru": 100, "Saint Vincent and the Grenadines": 100, "China": 100, "Algeria": 100, "Andorra": 100, "Solomon Islands": 100, "Tuvalu": 100, "Iceland": 100, "Marshall Islands": 100, "Papua New Guinea": 100, "Jordan": 100, "India": 100, "Singapore": 100, "Malta": 100, "Malaysia": 100, "Equatorial Guinea": 100, "Brunei": 100, "Bhutan": 100, "Palau": 100, "Seychelles": 100, "Saudi Arabia": 100, "Kuwait": 100, "Maldives": 100, "Bahrain": 100, "Oman": 100, "United Arab Emirates": 100, "Qatar": 100, "Cook Islands": 100}, "% Male": {"Qatar": 1, "United Arab Emirates": 2, "Oman": 3, "Bahrain": 4, "Maldives": 5, "Kuwait": 6, "Saudi Arabia": 7, "Seychelles": 8, "Palau": 9, "Bhutan": 10, "Brunei": 11, "Equatorial Guinea": 12, "Malaysia": 13, "Malta": 14, "Singapore": 15, "India": 16, "Jordan": 17, "Papua New Guinea": 18, "Marshall Islands": 19, "Iceland": 20, "Tuvalu": 21, "Solomon Islands": 22, "Andorra": 23, "Algeria": 24, "China": 25, "Saint Vincent and the Grenadines": 26, "Nauru": 27, "Côte d'Ivoire": 28, "Cape Verde": 29, "Libya": 30, "Senegal": 31, "Iran": 32, "Niger": 33, "Gabon": 34, "Pakistan": 35, "Yemen": 36, "Nigeria": 37, "Egypt": 38, "Afghanistan": 39, "Vanuatu": 40, "Belize": 41, "Mali": 42, "Uzbekistan": 43, "Morocco": 44, "East Timor": 45, "Norway": 46, "Cyprus": 47, "Sweden": 48, "Samoa": 49, "Honduras": 50, "Luxembourg": 51, "Togo": 52, "Comoros": 53, "Laos": 54, "Slovenia": 55, "USA": 56, "Indonesia": 57, "Iraq": 58, "Chad": 59, "Madagascar": 60, "Benin": 61, "Paraguay": 62, "Grenada": 63, "Ethiopia": 64, "Bolivia": 65, "Somalia": 66, "Syria": 67, "Panama": 68, "Dominica": 69, "Republic of Congo": 70, "Suriname": 71, "Ghana": 72, "Liberia": 73, "Mauritius": 74, "Turkey": 75, "South Korea": 76, "Philippines": 77, "Sierra Leone": 78, "Mongolia": 79, "Ecuador": 80, "Botswana": 81, "Cameroon": 82, "Burkina Faso": 83, "Gambia": 84, "Israel": 85, "Myanmar": 86, "Peru": 87, "Kenya": 88, "Dominican Republic": 89, "Sao Tome and Principe": 90, "Denmark": 91, "Chile": 92, "New Zealand": 93, "Liechtenstein": 94, "Netherlands": 95, "Micronesia": 96, "Switzerland": 97, "Burundi": 98, "Canada": 99, "Palestine": 100, "Argentina": 100, "Fiji": 100, "Australia": 100, "Democratic Republic of Congo": 100, "Guatemala": 100, "Uganda": 100, "Sudan": 100, "Djibouti": 100, "Tanzania": 100, "Ireland": 100, "Zambia": 100, "Angola": 100, "Guinea": 100, "Haiti": 100, "North Korea": 100, "Jamaica": 100, "Trinidad and Tobago": 100, "Kyrgyzstan": 100, "Albania": 100, "Tunisia": 100, "Finland": 100, "Guinea-Bissau": 100, "Costa Rica": 100, "Venezuela": 100, "Germany": 100, "Saint Lucia": 100, "Eritrea": 100, "Colombia": 100, "Cuba": 100, "Czechia": 100, "Belgium": 100, "UK": 100, "Austria": 100, "Brazil": 100, "Nicaragua": 100, "Kosovo": 100, "South Sudan": 100, "Bangladesh": 100, "San Marino": 100, "Tajikistan": 100, "Swaziland": 100, "Spain": 100, "Turkmenistan": 100, "Mauritania": 100, "Azerbaijan": 100, "Cambodia": 100, "Vietnam": 100, "Monaco": 100, "Italy": 100, "Namibia": 100, "Slovakia": 100, "Malawi": 100, "Japan": 100, "Rwanda": 100, "Lesotho": 100, "Kazakhstan": 100, "Thailand": 100, "Guyana": 100, "South Africa": 100, "North Macedonia": 100, "Lebanon": 100, "Kiribati": 100, "Mozambique": 100, "Uruguay": 100, "Mexico": 100, "France": 100, "Poland": 100, "Greece": 100, "Romania": 100, "Bulgaria": 100, "Sri Lanka": 100, "Croatia": 100, "Montenegro": 100, "Hungary": 100, "Central African Republic": 100, "Barbados": 100, "Nepal": 100, "Saint Kitts and Nevis": 100, "Bahamas": 100, "Zimbabwe": 100, "Portugal": 100, "Antigua and Barbuda": 100, "Bosnia and Herzegovina": 100, "Estonia": 100, "El Salvador": 100, "Serbia": 100, "Tonga": 100, "Lithuania": 100, "Georgia": 100, "Belarus": 100, "Ukraine": 100, "Armenia": 100, "Russia": 100, "Latvia": 100, "Moldova": 100, "Hong Kong": 100, "Cook Islands": 100}, "Fruit Consumption per Capita": {"Dominica": 1, "Dominican Republic": 2, "Bahamas": 3, "Guyana": 4, "Antigua and Barbuda": 5, "Saint Kitts and Nevis": 6, "Papua New Guinea": 7, "Saint Vincent and the Grenadines": 8, "Sao Tome and Principe": 9, "Albania": 10, "Uganda": 11, "Rwanda": 12, "USA": 13, "Ghana": 14, "Bosnia and Herzegovina": 15, "Maldives": 16, "Serbia": 17, "Samoa": 18, "Netherlands": 19, "Greece": 20, "Malawi": 21, "Panama": 22, "Grenada": 23, "Luxembourg": 24, "Oman": 25, "Bahrain": 26, "Jamaica": 27, "Colombia": 28, "Iceland": 29, "Seychelles": 30, "Austria": 31, "Turkey": 32, "North Macedonia": 33, "Cuba": 34, "Norway": 35, "Peru": 36, "Portugal": 37, "Gabon": 38, "Saint Lucia": 39, "Italy": 40, "Canada": 41, "Iran": 42, "Denmark": 43, "Mexico": 44, "Slovenia": 45, "Israel": 46, "Switzerland": 47, "France": 48, "Montenegro": 49, "Laos": 50, "Armenia": 51, "Tunisia": 52, "Morocco": 53, "Barbados": 54, "Ireland": 55, "Saudi Arabia": 56, "China": 57, "Finland": 58, "Uzbekistan": 59, "UK": 60, "Moldova": 61, "Kuwait": 62, "Qatar": 63, "Uruguay": 64, "Sweden": 65, "Tuvalu": 66, "Brazil": 67, "Romania": 68, "Algeria": 69, "Croatia": 70, "Comoros": 71, "Guinea": 72, "Guatemala": 73, "Belgium": 74, "Germany": 75, "Cameroon": 76, "Azerbaijan": 77, "Costa Rica": 78, "Haiti": 79, "Lebanon": 80, "Estonia": 81, "Tonga": 82, "Venezuela": 83, "Libya": 84, "Nauru": 85, "Vietnam": 86, "Philippines": 87, "El Salvador": 88, "New Zealand": 89, "Cyprus": 90, "Spain": 91, "Bolivia": 92, "Malta": 93, "Syria": 94, "Suriname": 95, "Hungary": 96, "Czechia": 97, "Mali": 98, "Indonesia": 99, "Australia": 100, "Paraguay": 100, "Trinidad and Tobago": 100, "Hong Kong": 100, "Angola": 100, "Swaziland": 100, "Egypt": 100, "United Arab Emirates": 100, "Belarus": 100, "Marshall Islands": 100, "Vanuatu": 100, "Russia": 100, "Sri Lanka": 100, "Argentina": 100, "Burundi": 100, "Kazakhstan": 100, "Thailand": 100, "Nigeria": 100, "Bulgaria": 100, "Poland": 100, "Slovakia": 100, "Ecuador": 100, "Kiribati": 100, "Lithuania": 100, "Tanzania": 100, "Malaysia": 100, "Fiji": 100, "Chile": 100, "Latvia": 100, "India": 100, "Georgia": 100, "Côte d'Ivoire": 100, "Kenya": 100, "Cape Verde": 100, "Sudan": 100, "Burkina Faso": 100, "Nepal": 100, "Namibia": 100, "Iraq": 100, "Mauritius": 100, "Democratic Republic of Congo": 100, "Central African Republic": 100, "South Korea": 100, "Botswana": 100, "Turkmenistan": 100, "Nicaragua": 100, "Guinea-Bissau": 100, "Honduras": 100, "Belize": 100, "Ukraine": 100, "Japan": 100, "Republic of Congo": 100, "Benin": 100, "Myanmar": 100, "Bhutan": 100, "South Sudan": 100, "Mongolia": 100, "Jordan": 100, "Liberia": 100, "Madagascar": 100, "South Africa": 100, "Tajikistan": 100, "Afghanistan": 100, "Kyrgyzstan": 100, "Djibouti": 100, "Solomon Islands": 100, "Sierra Leone": 100, "Bangladesh": 100, "Yemen": 100, "Pakistan": 100, "Micronesia": 100, "Mauritania": 100, "Niger": 100, "Lesotho": 100, "East Timor": 100, "Mozambique": 100, "Senegal": 100, "Zimbabwe": 100, "Somalia": 100, "Cambodia": 100, "Ethiopia": 100, "Chad": 100, "Gambia": 100, "Togo": 100, "Zambia": 100, "Andorra": 100, "Brunei": 100, "Cook Islands": 100, "Eritrea": 100, "Equatorial Guinea": 100, "Liechtenstein": 100, "Monaco": 100, "Kosovo": 100, "Palau": 100, "North Korea": 100, "Palestine": 100, "Singapore": 100, "San Marino": 100}, "Political Polarisation": {"Myanmar": 1, "Turkey": 2, "Poland": 3, "Belarus": 4, "Bangladesh": 5, "Nicaragua": 6, "Yemen": 7, "Hungary": 8, "Libya": 9, "Peru": 10, "Romania": 11, "Slovenia": 12, "Afghanistan": 13, "South Sudan": 14, "Bolivia": 15, "Venezuela": 16, "Madagascar": 17, "Armenia": 18, "India": 19, "Cameroon": 20, "Mexico": 21, "Chad": 22, "Argentina": 23, "Colombia": 24, "Malaysia": 25, "Bahrain": 26, "Ukraine": 27, "USA": 28, "Georgia": 29, "Guinea": 30, "Swaziland": 31, "Liberia": 32, "Brazil": 33, "Comoros": 34, "Iraq": 35, "Burkina Faso": 36, "Azerbaijan": 37, "El Salvador": 38, "Hong Kong": 39, "Russia": 40, "France": 41, "Zimbabwe": 42, "Central African Republic": 43, "Mozambique": 44, "South Korea": 45, "Bosnia and Herzegovina": 46, "Kosovo": 47, "Serbia": 48, "Iran": 49, "Lebanon": 50, "Burundi": 51, "Tunisia": 52, "Moldova": 53, "Slovakia": 54, "Pakistan": 55, "Eritrea": 56, "Montenegro": 57, "Thailand": 58, "Nepal": 59, "Cambodia": 60, "Côte d'Ivoire": 61, "Ethiopia": 62, "Mali": 63, "Maldives": 64, "Somalia": 65, "North Macedonia": 66, "Sudan": 67, "Indonesia": 68, "Malta": 69, "Equatorial Guinea": 70, "Guyana": 71, "Ecuador": 72, "Kenya": 73, "Croatia": 74, "Togo": 75, "Cyprus": 76, "Haiti": 77, "Seychelles": 78, "Philippines": 79, "Bulgaria": 80, "Syria": 81, "Guatemala": 82, "Honduras": 83, "Djibouti": 84, "Guinea-Bissau": 85, "Kazakhstan": 86, "Italy": 87, "Spain": 88, "Mauritius": 89, "Sri Lanka": 90, "Uganda": 91, "Malawi": 92, "Lesotho": 93, "Sierra Leone": 94, "Mongolia": 95, "Israel": 96, "Senegal": 97, "Egypt": 98, "Netherlands": 99, "China": 100, "Suriname": 100, "Benin": 100, "Germany": 100, "Republic of Congo": 100, "South Africa": 100, "Austria": 100, "UK": 100, "Kyrgyzstan": 100, "Portugal": 100, "Namibia": 100, "Gabon": 100, "Belgium": 100, "Canada": 100, "Czechia": 100, "Niger": 100, "Chile": 100, "Ghana": 100, "Democratic Republic of Congo": 100, "Sweden": 100, "Nigeria": 100, "Jamaica": 100, "Cape Verde": 100, "Albania": 100, "Cuba": 100, "Iceland": 100, "Zambia": 100, "Costa Rica": 100, "Paraguay": 100, "New Zealand": 100, "Gambia": 100, "Morocco": 100, "Angola": 100, "East Timor": 100, "Bhutan": 100, "Dominican Republic": 100, "Vietnam": 100, "Tanzania": 100, "North Korea": 100, "Jordan": 100, "Panama": 100, "Solomon Islands": 100, "Australia": 100, "Kuwait": 100, "Uzbekistan": 100, "Estonia": 100, "Lithuania": 100, "Papua New Guinea": 100, "Finland": 100, "Singapore": 100, "Greece": 100, "Latvia": 100, "Mauritania": 100, "Tajikistan": 100, "Laos": 100, "United Arab Emirates": 100, "Switzerland": 100, "Algeria": 100, "Fiji": 100, "Rwanda": 100, "Uruguay": 100, "Denmark": 100, "Luxembourg": 100, "Saudi Arabia": 100, "Japan": 100, "Barbados": 100, "Qatar": 100, "Trinidad and Tobago": 100, "Norway": 100, "Sao Tome and Principe": 100, "Botswana": 100, "Turkmenistan": 100, "Ireland": 100, "Oman": 100, "Andorra": 100, "Antigua and Barbuda": 100, "Bahamas": 100, "Belize": 100, "Brunei": 100, "Cook Islands": 100, "Dominica": 100, "Micronesia": 100, "Grenada": 100, "Kiribati": 100, "Saint Kitts and Nevis": 100, "Saint Lucia": 100, "Liechtenstein": 100, "Monaco": 100, "Marshall Islands": 100, "Nauru": 100, "Palau": 100, "Palestine": 100, "San Marino": 100, "Tonga": 100, "Tuvalu": 100, "Saint Vincent and the Grenadines": 100, "Vanuatu": 100, "Samoa": 100}, "Railway Journeys (total km)": {"China": 1, "Japan": 2, "India": 3, "Russia": 4, "South Korea": 5, "France": 6, "Germany": 7, "Egypt": 8, "Indonesia": 9, "Italy": 10, "Pakistan": 11, "UK": 12, "Spain": 13, "Brazil": 14, "Poland": 15, "Switzerland": 16, "USA": 17, "Iran": 18, "Netherlands": 19, "Ukraine": 20, "Turkey": 21, "Bangladesh": 22, "Australia": 23, "Kazakhstan": 24, "Austria": 25, "Argentina": 26, "Sweden": 27, "Sri Lanka": 28, "Belgium": 29, "Czechia": 30, "Denmark": 31, "Thailand": 32, "Romania": 33, "Hungary": 34, "Belarus": 35, "Morocco": 36, "Myanmar": 37, "South Africa": 38, "Uzbekistan": 39, "Portugal": 40, "Finland": 41, "Turkmenistan": 42, "Slovakia": 43, "Israel": 44, "Norway": 45, "Vietnam": 46, "Cuba": 47, "Syria": 48, "Bulgaria": 49, "Malaysia": 50, "Ireland": 51, "New Zealand": 52, "Chile": 53, "Greece": 54, "Tunisia": 55, "Slovenia": 56, "Croatia": 57, "Canada": 58, "Jordan": 59, "Tanzania": 60, "Mexico": 61, "Philippines": 62, "Latvia": 63, "Algeria": 64, "Lithuania": 65, "Luxembourg": 66, "Estonia": 67, "Georgia": 68, "Republic of Congo": 69, "Mozambique": 70, "Cameroon": 71, "Mali": 72, "Serbia": 73, "Nigeria": 74, "Djibouti": 75, "Saudi Arabia": 76, "Senegal": 77, "Peru": 78, "Kenya": 79, "Azerbaijan": 80, "Iraq": 81, "Botswana": 82, "Mongolia": 83, "Gabon": 84, "Ghana": 85, "Sudan": 86, "Benin": 87, "Armenia": 88, "Mauritania": 89, "Cambodia": 90, "Malawi": 91, "Montenegro": 92, "North Macedonia": 93, "Moldova": 94, "Tajikistan": 95, "Kyrgyzstan": 96, "Zimbabwe": 97, "Bosnia and Herzegovina": 98, "Venezuela": 99, "Côte d'Ivoire": 100, "Madagascar": 100, "Uruguay": 100, "Democratic Republic of Congo": 100, "El Salvador": 100, "Zambia": 100, "Albania": 100, "Swaziland": 100, "Afghanistan": 100, "Angola": 100, "Andorra": 100, "United Arab Emirates": 100, "Antigua and Barbuda": 100, "Burundi": 100, "Burkina Faso": 100, "Bahrain": 100, "Bahamas": 100, "Belize": 100, "Bolivia": 100, "Barbados": 100, "Brunei": 100, "Bhutan": 100, "Central African Republic": 100, "Cook Islands": 100, "Colombia": 100, "Comoros": 100, "Cape Verde": 100, "Costa Rica": 100, "Cyprus": 100, "Dominica": 100, "Dominican Republic": 100, "Ecuador": 100, "Eritrea": 100, "Ethiopia": 100, "Fiji": 100, "Micronesia": 100, "Guinea": 100, "Gambia": 100, "Guinea-Bissau": 100, "Equatorial Guinea": 100, "Grenada": 100, "Guatemala": 100, "Guyana": 100, "Hong Kong": 100, "Honduras": 100, "Haiti": 100, "Iceland": 100, "Jamaica": 100, "Kiribati": 100, "Saint Kitts and Nevis": 100, "Kuwait": 100, "Laos": 100, "Lebanon": 100, "Liberia": 100, "Libya": 100, "Saint Lucia": 100, "Liechtenstein": 100, "Lesotho": 100, "Monaco": 100, "Maldives": 100, "Marshall Islands": 100, "Malta": 100, "Mauritius": 100, "Namibia": 100, "Niger": 100, "Nicaragua": 100, "Nepal": 100, "Nauru": 100, "Oman": 100, "Kosovo": 100, "Panama": 100, "Palau": 100, "Papua New Guinea": 100, "North Korea": 100, "Paraguay": 100, "Palestine": 100, "Qatar": 100, "Rwanda": 100, "Singapore": 100, "Solomon Islands": 100, "Sierra Leone": 100, "San Marino": 100, "Somalia": 100, "South Sudan": 100, "Sao Tome and Principe": 100, "Suriname": 100, "Seychelles": 100, "Chad": 100, "Togo": 100, "East Timor": 100, "Tonga": 100, "Trinidad and Tobago": 100, "Tuvalu": 100, "Uganda": 100, "Saint Vincent and the Grenadines": 100, "Vanuatu": 100, "Samoa": 100, "Yemen": 100}};
+
+const countries = [
+"Afghanistan","Albania","Algeria","Andorra","Angola","Antigua and Barbuda","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Canada","Cape Verde","Central African Republic","Chad","Chile","China","Colombia","Comoros","Cook Islands","Costa Rica","Côte d'Ivoire","Croatia","Cuba","Cyprus","Czechia","Democratic Republic of Congo","Denmark","Djibouti","Dominica","Dominican Republic","East Timor","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hong Kong","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kosovo","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar","Republic of Congo","Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Swaziland","Sweden","Switzerland","Syria","Tajikistan","Tanzania","Thailand","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","UK","Ukraine","United Arab Emirates","Uruguay","USA","Uzbekistan","Vanuatu","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"
+];
+
+const categoryNames = Object.keys(data);
+const maxRounds = categoryNames.length;
+
+let usedCountries = new Set();
+let chosenCategories = new Set();
+let currentCountry = null;
+let totalScore = 0;
+let rounds = 0;
+
+const genBtn = document.getElementById('genBtn');
+const currentCountryEl = document.getElementById('currentCountry');
+const catsEl = document.getElementById('cats');
+const totalScoreEl = document.getElementById('totalScore');
+const roundsDoneEl = document.getElementById('roundsDone');
+const logEl = document.getElementById('log');
+
+function renderCategoryButtons(){
+  catsEl.innerHTML = '';
+  categoryNames.forEach((cat, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn';
+    btn.textContent = cat;
+    btn.disabled = false;
+    if(chosenCategories.has(cat)){
+      btn.classList.add('disabled');
+      btn.disabled = true;
+    }
+    btn.addEventListener('click', () => onCategoryClick(cat, btn));
+    catsEl.appendChild(btn);
+  });
+}
+
+function log(msg){
+  const p = document.createElement('div');
+  p.textContent = msg;
+  logEl.prepend(p);
+}
+
+function pickRandomCountry(){
+  const pool = countries.filter(c => !usedCountries.has(c));
+  if(pool.length === 0) return null;
+  const i = Math.floor(Math.random() * pool.length);
+  return pool[i];
+}
+
+genBtn.addEventListener('click', () => {
+  if(usedCountries.size >= maxRounds){
+    alert('All rounds completed. Refresh to start again.');
+    return;
+  }
+  const next = pickRandomCountry();
+  if(!next){
+    alert('No more countries available.');
+    return;
+  }
+  currentCountry = next;
+  currentCountryEl.textContent = currentCountry;
+  log(`Generated country: ${currentCountry}`);
+});
+
+function lookupScore(mapping, country){
+  // exact match
+  if(mapping.hasOwnProperty(country)) return mapping[country];
+  // try case-insensitive match
+  const lower = Object.keys(mapping).find(k => k.toLowerCase() === country.toLowerCase());
+  if(lower) return mapping[lower];
+  // try match by ISO code if mapping uses codes (e.g., 'ZAF' for South Africa)
+  // build reverse map of common codes from mapping keys that are 3-letter uppercase
+  const codeKey = Object.keys(mapping).find(k => k === country.toUpperCase());
+  if(codeKey) return mapping[codeKey];
+  // try fuzzy: match by stripped non-alphanumeric and compare
+  const strip = s => s.toLowerCase().replace(/[^a-z0-9]/g,'');
+  const sCountry = strip(country);
+  const fuzzyKey = Object.keys(mapping).find(k => strip(k) === sCountry);
+  if(fuzzyKey) return mapping[fuzzyKey];
+  return undefined;
+}
+
+function onCategoryClick(cat, btn){
+  if(!currentCountry){
+    alert('Please generate a country first.');
+    return;
+  }
+  if(chosenCategories.has(cat)) return;
+  const mapping = data[cat] || {};
+  let sc = lookupScore(mapping, currentCountry);
+  if(sc === undefined){
+    sc = 0;
+    log(`No score found for ${currentCountry} in "${cat}" — assigned 0.`);
+  } else {
+    log(`Scored ${sc} for ${currentCountry} in "${cat}".`);
+  }
+  totalScore += Number(sc) || 0;
+  totalScoreEl.textContent = totalScore;
+  rounds += 1;
+  roundsDoneEl.textContent = `${rounds}`;
+  chosenCategories.add(cat);
+  usedCountries.add(currentCountry);
+  btn.classList.add('disabled');
+  btn.disabled = true;
+  currentCountry = null;
+  currentCountryEl.textContent = 'No country yet';
+  if(rounds >= maxRounds){
+    log(`Game complete! Final score: ${totalScore}`);
+    alert('Game complete! Final score: ' + totalScore + '. Refresh the page to play again.');
+    genBtn.disabled = true;
+  }
+}
+
+renderCategoryButtons();
+log('Welcome to GeoToby — click "Country Generator Button" to start.');
+
+</script>
+</body>
+</html>
