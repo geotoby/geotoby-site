@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta charset="UTF-8">
 <title>GeoToby – Modern Dark Edition</title>
 <style>
@@ -66,13 +67,13 @@
     .grid {
         display: grid;
         gap: 12px;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
         margin-top: 20px;
     }
 
-    .category-btn {
-        padding: 14px 12px;
-        font-size: 1em;
+    .category-btn { height:160px;
+        padding: 28px 24px;
+        font-size: 3em;
         border-radius: 12px;
         border: none;
         cursor: pointer;
@@ -95,6 +96,22 @@
         font-size: 1.8em;
         text-shadow: 0 0 6px #6bd9ff;
     }
+
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: 1fr !important;
+  }
+  .cat-btn {
+    height: 140px !important;
+    font-size: 2em !important;
+    padding: 20px !important;
+  }
+  #genBtn {
+    font-size: 1.8em !important;
+    padding: 18px !important;
+  }
+}
+
 </style>
 </head>
 
@@ -108,7 +125,7 @@
 </div>
 
 
-<button id="genBtn">Country Generator Button</button>
+<button id="genBtn" style="font-size:1.6em;padding:20px;">Country Generator Button</button>
 
 <div id="currentCountry" style="font-size:1.9em;font-weight:700;margin-top:12px;">No country yet</div>
 
