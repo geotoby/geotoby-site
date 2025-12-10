@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta charset="UTF-8">
 <title>GeoToby – Modern Dark Edition</title>
 <style>
@@ -64,13 +65,14 @@
     }
 
     .grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
         display: grid;
         gap: 12px;
         grid-template-columns: 1fr;
         margin-top: 20px;
     }
 
-    .category-btn { height:220px;
+    .category-btn { height:140px; font-size:2em;
         padding: 28px 24px;
         font-size: 4em;
         border-radius: 12px;
